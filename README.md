@@ -3,8 +3,7 @@
 **[API Documentation Pages for current and previous releases of this library can be found here](https://freertos.github.io/coreMQTT/)**
 
 This repository contains the coreMQTT library that has been optimized for a low
-memory footprint. The coreMQTT library is compliant with the
-[MQTT 3.1.1](https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html)
+memory footprint.
 standard. It has no dependencies on any additional libraries other than the
 standard C library, a customer-implemented network transport interface, and
 _optionally_ a user-implemented platform time function. This library is
@@ -20,6 +19,10 @@ library has also undergone both static code analysis from
 [Coverity static analysis](https://scan.coverity.com/), and validation of memory
 safety through the
 [CBMC automated reasoning tool](https://www.cprover.org/cbmc/).
+
+-For MQTT v3.1.1 [(MQTTv3 Specification)](https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html), use code from tag : [coreMQTT v2.3.1](https://github.com/FreeRTOS/coreMQTT/tree/v2.3.1)
+
+-For MQTT v5.0 [(MQTTv5 Specification)](https://docs.oasis-open.org/mqtt/mqtt/v5.0/mqtt-v5.0.html), use code from tag : [coreMQTT v3.0.0](https://github.com/FreeRTOS/coreMQTT/tree/v3.0.0)
 
 See memory requirements for this library
 [here](./docs/doxygen/include/size_table.md).
@@ -109,10 +112,15 @@ connectInfo.userNameLength = USERNAME_STRING_LENGTH;
 mqttStatus = MQTT_Connect( pMqttContext, &connectInfo, NULL, CONNACK_RECV_TIMEOUT_MS, pSessionPresent );
 ```
 
-## Upgrading to v2.0.0 and above
+## Upgrading to v2.x
 
-With coreMQTT versions >=v2.0.0, there are breaking changes. Please refer to the
-[coreMQTT version >=v2.0.0 Migration Guide](MigrationGuide.md).
+With coreMQTT versions v2.x, there are breaking changes. Please refer to the
+[coreMQTT version v2.x Migration Guide](MigrationGuide.md).
+
+## Upgrading to v3.0.0 and above
+
+With coreMQTT versions >=v3.0.0, there are breaking changes. Please refer to the
+[coreMQTT version >=v3.0.0 Migration Guide](MigrationGuide.md)
 
 ## Building the Library
 
@@ -154,10 +162,6 @@ git submodule update --checkout --init --recursive test/unit-test/CMock
 
 ### Platform Prerequisites
 
-- Docker
-
-or the following:
-
 - For running unit tests
   - **C90 compiler** like gcc
   - **CMake 3.13.0 or later**
@@ -168,25 +172,33 @@ or the following:
 
 ### Steps to build **Unit Tests**
 
-1. If using docker, launch the container:
-
-   1. `docker build -t coremqtt .`
-   1. `docker run -it -v "$PWD":/workspaces/coreMQTT -w /workspaces/coreMQTT coremqtt`
-
 1. Go to the root directory of this repository. (Make sure that the **CMock**
    submodule is cloned as described [above](#checkout-cmock-submodule))
 
 1. Run the _cmake_ command:
+
+    For Linux machines:
+    ```
+    cmake -S test -B build/ \
+              -G "Unix Makefiles" \
+              -DCMAKE_BUILD_TYPE=Debug  \
+              -DBUILD_CLONE_SUBMODULES=ON \
+              -DUNITTEST=1 \
+              -DCOV_ANALYSIS=1 \
+              -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Wsign-compare -Werror -DLIBRARY_LOG_LEVEL=LOG_DEBUG'
+    ```
+    For Mac machines:
+
     ```
     cmake -S test -B build/ \
               -G "Unix Makefiles" \
               -DCMAKE_BUILD_TYPE=RelWithDebInfo  \
               -DBUILD_CLONE_SUBMODULES=ON \
               -DUNITTEST=1 \
-              -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Wsign-compare -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG'
+              -DCOV_ANALYSIS=1 \
+              -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Wsign-compare -Werror -DLIBRARY_LOG_LEVEL=LOG_DEBUG' \
+              -DCMAKE_C_STANDARD=99
     ```
-    Note: For Mac users, additionally add the `-DCMAKE_C_STANDARD=99` flag to the
-    above command.
 
 1. Run this command to build the library and unit tests: `make -C build all`.
 
